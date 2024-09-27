@@ -40,3 +40,7 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+bootJar {
+    archiveName = 'coupon-app.jar'
+}
