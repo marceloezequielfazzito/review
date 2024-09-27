@@ -33,17 +33,17 @@ it will expose port 8080
 
 - The service is in charge of managing applying coupons to Baskets through restful API
 
-# swagger server is available in url 
+### swagger server is available in url 
 
 http://{server}:{port}/swagger-ui/index.html#/
+
+### get coupons by codes
+
+Get all coupons by code
 
 example
 
 http://localhost:8080/swagger-ui/index.html#/
-
-### coupons by codes
-
-Get all coupons by code 
 
 ```
 GET http://[server]:[port]/api/v1/coupons?codes=[COUPON-CODE,COUPON-CODE]  - mandatory query params code
