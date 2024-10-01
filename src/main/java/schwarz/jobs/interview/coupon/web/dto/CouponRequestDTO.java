@@ -6,8 +6,7 @@ import javax.validation.constraints.NotNull;
 
 import lombok.Builder;
 import lombok.Data;
-// making mutable inmutable
-// this dto makes not sense
+
 @Data
 @Builder
 public class CouponRequestDTO {

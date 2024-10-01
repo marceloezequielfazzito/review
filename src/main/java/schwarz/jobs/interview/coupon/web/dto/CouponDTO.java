@@ -5,7 +5,6 @@ import java.math.BigDecimal;
 import lombok.Builder;
 import lombok.Data;
 
-// making mutable inmutable
 @Data
 @Builder
 public class CouponDTO {

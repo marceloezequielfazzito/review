@@ -52,10 +52,10 @@ public class CouponService {
 
         try {
             coupon = Coupon.builder()
-                .code(couponDTO.getCode().toLowerCase())
-                .discount(couponDTO.getDiscount())
-                .minBasketValue(couponDTO.getMinBasketValue())
-                .build();
+                    .code(couponDTO.getCode().toLowerCase())
+                    .discount(couponDTO.getDiscount())
+                    .minBasketValue(couponDTO.getMinBasketValue())
+                    .build();
 
         } catch (final NullPointerException e) {
 

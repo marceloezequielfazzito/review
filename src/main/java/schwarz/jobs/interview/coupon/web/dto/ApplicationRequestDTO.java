@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import schwarz.jobs.interview.coupon.core.services.model.Basket;
 
-// making mutable inmutable
 @Data
 @Builder
 public class ApplicationRequestDTO {

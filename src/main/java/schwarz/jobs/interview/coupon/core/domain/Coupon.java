@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @Builder
-@NoArgsConstructor // useless
-@AllArgsConstructor // useless
+@NoArgsConstructor
+@AllArgsConstructor
 public class Coupon {
 
     @Id

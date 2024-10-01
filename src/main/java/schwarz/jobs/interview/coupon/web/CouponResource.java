@@ -23,17 +23,13 @@ import schwarz.jobs.interview.coupon.web.dto.ApplicationRequestDTO;
 import schwarz.jobs.interview.coupon.web.dto.CouponDTO;
 import schwarz.jobs.interview.coupon.web.dto.CouponRequestDTO;
 
-// no read me
-// no test
-// no docker image
-// no docker compose
+
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/api")  // change url
-@Slf4j  //?????????
+@RequestMapping("/api")
+@Slf4j
 public class CouponResource {
 
-    // no swaagger
 
     private final CouponService couponService;
 
@@ -42,42 +38,40 @@ public class CouponResource {
      * @return
      */
     //@ApiOperation(value = "Applies currently active promotions and coupons from the request to the requested Basket - Version 1")
-    @PostMapping(value = "/apply") // check url
-    public ResponseEntity<Basket> apply( // check return value  exposing entity
+    @PostMapping(value = "/apply")
+    public ResponseEntity<Basket> apply(
         //@ApiParam(value = "Provides the necessary basket and customer information required for the coupon application", required = true)
         @RequestBody @Valid final ApplicationRequestDTO applicationRequestDTO) {
 
-        //logic makes no sense move to service
 
         log.info("Applying coupon");
 
         final Optional<Basket> basket =
-            couponService.apply(applicationRequestDTO.getBasket(), applicationRequestDTO.getCode()); // signature makes no sense
+            couponService.apply(applicationRequestDTO.getBasket(), applicationRequestDTO.getCode());
 
         if (basket.isEmpty()) { //logic makes no sense
             return ResponseEntity.notFound().build();
         }
 
-        if (!applicationRequestDTO.getBasket().isApplicationSuccessful()) { // check logic make no sense
+        if (!applicationRequestDTO.getBasket().isApplicationSuccessful()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
 
         log.info("Applied coupon");
 
-        return ResponseEntity.ok().body(applicationRequestDTO.getBasket()); // ???????????????
+        return ResponseEntity.ok().body(applicationRequestDTO.getBasket());
     }
 
-    @PostMapping("/create") // check url
+    @PostMapping("/create")
     public ResponseEntity<Void> create(@RequestBody @Valid final CouponDTO couponDTO) {
 
-        final Coupon coupon = couponService.createCoupon(couponDTO); // return value noy used return value is entity
+        final Coupon coupon = couponService.createCoupon(couponDTO);
 
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/coupons")
-    public List<Coupon> getCoupons(@RequestBody @Valid final CouponRequestDTO couponRequestDTO ) { // use path params
-         // not pagination
+    public List<Coupon> getCoupons(@RequestBody @Valid final CouponRequestDTO couponRequestDTO ) {
         return couponService.getCoupons(couponRequestDTO);
     }
 }
