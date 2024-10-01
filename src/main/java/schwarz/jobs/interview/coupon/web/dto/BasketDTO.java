@@ -1,25 +1,25 @@
 package schwarz.jobs.interview.coupon.web.dto;
 
-import java.math.BigDecimal;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 
-@Schema(name = "Coupon", description = "Coupon VO")
+@Schema(name = "Basket", description = "Basket VO")
 @Builder
 @Value
 @NoArgsConstructor(force = true, access = AccessLevel.PRIVATE)
 @AllArgsConstructor
-public class CouponDTO {
-
-    private BigDecimal discount;
+@ToString
+public class BasketDTO {
 
     @NotNull
-    private String code;
+    private BigDecimal value;
 
-    private BigDecimal minBasketValue;
+    private BigDecimal appliedDiscount;
+
+    private boolean applicationSuccessful;
 
 
 }

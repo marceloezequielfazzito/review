@@ -1,17 +1,19 @@
 package schwarz.jobs.interview.coupon.core.services;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.stereotype.Service;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import schwarz.jobs.interview.coupon.core.domain.Coupon;
 import schwarz.jobs.interview.coupon.core.repository.CouponRepository;
 import schwarz.jobs.interview.coupon.core.services.model.Basket;
+import schwarz.jobs.interview.coupon.web.dto.BasketDTO;
 import schwarz.jobs.interview.coupon.web.dto.CouponDTO;
-import schwarz.jobs.interview.coupon.web.dto.CouponRequestDTO;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,59 +21,62 @@ public class CouponService {
 
     private final CouponRepository couponRepository;
 
-    public Optional<Coupon> getCoupon(final String code) {
-        return couponRepository.findByCode(code);
-    }
+    public BasketDTO apply(final BasketDTO basketDTO, final String code) {
 
-    public Optional<Basket> apply(final Basket basket, final String code) {
 
-        return getCoupon(code).map(coupon -> {  // check wierd logic
+        Coupon coupon = couponRepository.findByCode(code)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Coupon code %s not found", code)));
 
-            if (basket.getValue().doubleValue() >= 0) {
 
-                if (basket.getValue().doubleValue() > 0) {
+        Basket basket = Basket.builder().value(basketDTO.getValue()).build();
+        basket.applyCoupon(coupon);
 
-                    basket.applyDiscount(coupon.getDiscount());
-
-                } else if (basket.getValue().doubleValue() == 0) {
-                    return basket;
-                }
-
-            } else {
-                System.out.println("DEBUG: TRIED TO APPLY NEGATIVE DISCOUNT!"); // weird stuff
-                throw new RuntimeException("Can't apply negative discounts");
-            }
-
-            return basket;
-        });
-    }
-
-    public Coupon createCoupon(final CouponDTO couponDTO) {
-
-        Coupon coupon = null;
-
-        try {
-            coupon = Coupon.builder()
-                    .code(couponDTO.getCode().toLowerCase())
-                    .discount(couponDTO.getDiscount())
-                    .minBasketValue(couponDTO.getMinBasketValue())
-                    .build();
-
-        } catch (final NullPointerException e) {
-
-            // Don't coupon when code is null
-            // check this logic
+        if (!basket.isApplicationSuccessful()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Could not apply Coupon code %s to basket", code));
         }
 
-        return couponRepository.save(coupon);
+        return BasketDTO.builder()
+                .value(basket.getValue())
+                .appliedDiscount(basket.getAppliedDiscount())
+                .applicationSuccessful(basket.isApplicationSuccessful())
+                .build();
     }
 
-    public List<Coupon> getCoupons(final CouponRequestDTO couponRequestDTO) {
+    public CouponDTO createCoupon(final CouponDTO couponDTO) {
 
-        final ArrayList<Coupon> foundCoupons = new ArrayList<>();
+        if (couponDTO.getCode() == null || couponDTO.getCode().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Coupon code cannot be null or empty");
+        }
 
-        couponRequestDTO.getCodes().forEach(code -> foundCoupons.add(couponRepository.findByCode(code).get()));
+        try {
+            Coupon coupon = couponRepository.save(buildCoupon(couponDTO));
+            return buildCouponDTO(coupon);
+        } catch (DataIntegrityViolationException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Coupon code %s already exists", couponDTO.getCode()));
+        }
 
-        return foundCoupons;
+    }
+
+    public List<CouponDTO> getCoupons(final String[] codes) {
+        return couponRepository.findByCodeIn(List.of(codes))
+                .stream().map(this::buildCouponDTO)
+                .collect(Collectors.toList());
+
+    }
+
+    private Coupon buildCoupon(CouponDTO couponDTO) {
+        return Coupon.builder()
+                .code(couponDTO.getCode())
+                .discount(couponDTO.getDiscount())
+                .minBasketValue(couponDTO.getMinBasketValue())
+                .build();
+    }
+
+    private CouponDTO buildCouponDTO(Coupon coupon) {
+        return CouponDTO.builder()
+                .code(coupon.getCode())
+                .discount(coupon.getDiscount())
+                .minBasketValue(coupon.getMinBasketValue())
+                .build();
     }
 }
